@@ -7,6 +7,9 @@ usage
 =====
 
 install bs4 and requests
+
 put your notifymyandroid apikeys in the dict
+
 loop it
+
 enjoy
