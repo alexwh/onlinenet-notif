@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 
 url = "https://console.online.net/en/order/server_limited"
+endpoint = "https://www.notifymyandroid.com/publicapi/notify"
 html = requests.get(url).text
 soup = BeautifulSoup(html, "lxml")
 rows = soup.find_all("tr")
@@ -21,7 +22,10 @@ for server in servers:
     # the avail cells have \n's everywhere
     server["avail"] = server["avail"].strip()
     if server["avail"] != "back order":
-        msg += "{} is available for {} with {} left\n".format(server["name"], server["price"], server["avail"])
+        msg += "{} is available for {} with {} left\n".format(
+            server["name"],
+            server["price"],
+            server["avail"])
 
 if msg:
     msg += "happened at {}".format(datetime.now())
@@ -34,5 +38,5 @@ if msg:
     postdata["description"] = msg
     postdata["priority"] = 2
     postdata["url"] = url
-    notifreq = requests.post("https://www.notifymyandroid.com/publicapi/notify", data=postdata)
+    notifreq = requests.post(endpoint, data=postdata)
     print(notifreq.text)
