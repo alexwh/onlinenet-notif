@@ -4,6 +4,7 @@ import requests
 from datetime import datetime
 import json
 
+# create an access token from pushbullet's My Account page
 pb_accesstokens = ['o.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx']
 
 url = "https://console.online.net/en/order/server_limited"
