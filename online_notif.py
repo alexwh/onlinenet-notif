@@ -2,9 +2,12 @@
 from bs4 import BeautifulSoup
 import requests
 from datetime import datetime
+import json
+
+pb_accesstokens = ['o.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx']
 
 url = "https://console.online.net/en/order/server_limited"
-endpoint = "https://www.notifymyandroid.com/publicapi/notify"
+# url = "https://console.online.net/en/order/server"
 html = requests.get(url).text
 soup = BeautifulSoup(html, "lxml")
 rows = soup.find_all("tr")
@@ -19,24 +22,28 @@ for row in rows:
 
 msg = ""
 for server in servers:
-    # the avail cells have \n's everywhere
     server["avail"] = server["avail"].strip()
-    if server["avail"] != "back order":
-        msg += "{} is available for {} with {} left\n".format(
-            server["name"],
-            server["price"],
-            server["avail"])
+    if "XC" in server["name"] and not "SSD" in server["disk"]:
+        if server["avail"] != "back order" and "victim" not in server["avail"]:
+            msg += "{} is available for {} with {} left\n".format(server["name"], server["price"], server["avail"])
 
 if msg:
-    msg += "happened at {}".format(datetime.now())
+    msg += "happened at {}\n".format(datetime.now())
+    msg += url
     print("sending message:", msg)
 
-    postdata = {}
-    postdata["apikey"] = "putemhere"
-    postdata["application"] = "onlinenet notif"
-    postdata["event"] = "Online.net server in stock"
-    postdata["description"] = msg
-    postdata["priority"] = 2
-    postdata["url"] = url
-    notifreq = requests.post(endpoint, data=postdata)
+    for token in pb_accesstokens:
+        headers = {"Content-Type": "application/json", "Access-Token": token}
+
+        postdata = {}
+        postdata["title"] = "Online.net notification"
+        postdata["body"] = msg
+        postdata["type"] = "note"
+        postdata = json.dumps(postdata)
+
+        notifreq = requests.post("https://api.pushbullet.com/v2/pushes", data=postdata, headers=headers)
+
     print(notifreq.text)
+
+else:
+    print("nothing at {}".format(datetime.now()))
